@@ -3,6 +3,10 @@ import pythoncom
 import pandas as pd
 from datetime import date, timedelta, datetime
 import os
+import json
+
+with open('mejlovi.json', 'r', encoding='utf-8') as f:
+    mejlovi = json.load(f)
 
 pythoncom.CoInitialize()
 
@@ -13,9 +17,8 @@ date = datetime.today()
 date_str = date.strftime("%d-%m-%Y")
 name_of_excel = f"Lista na precki - TT {date_str}.xlsx"
 excel_path = os.path.join(r'C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\kreirani datoteki', name_of_excel)
-#message.To = "Klimentina.Tunteva@telekom.mk;Snezana.Tilovska@telekom.mk;Maja.Ivanovska@telekom.mk;Elizabeta.Arsova@telekom.mk;Regionalni_Ofisi.mk@telekom.mk;CTSOTechnicalSupport@telekom.mk;Emilija.Andonovska@telekom.mk;Anastas.Miskovski@telekom.mk;Dimitar.Mukaetov@telekom.mk;Kelmend.Ziba@telekom.mk;Goran.Jovanoski@telekom.mk;Irena.Lokvenec@telekom.mk;Tatjana.Korpaseva@telekom.mk;Zanet.Tanturovska@telekom.mk;CTSO_Skopje_Dispatchers.mk@telekom.mk;CSODGPON@telekom.mk;CSODADSL@telekom.mk" 
-message.To = "Petar.Nikolov@telekom.mk; Snezana.Tilovska@telekom.mk;CSODGPON@telekom.mk;CSODADSL@telekom.mk;Klimentina.Tunteva@telekom.mk"
-#message.To = "Petar.Nikolov@telekom.mk"
+#message.To = f"{mejlovi['Pero']}"
+message.To = f"{mejlovi['Snezhana']}; {mejlovi['Klimentina']};{mejlovi['Dimitar']}; {mejlovi['Maja']}; {mejlovi['Elizabeta']}; {mejlovi['Regionalni_Ofisi']}; {mejlovi["CTSO"]}; {mejlovi["Anastas"]}; {mejlovi["Kelmend"]}; {mejlovi["Goran"]}; {mejlovi["Irena"]}; {mejlovi["Tatjana"]}; {mejlovi["Zanet"]}; {mejlovi["Emilija"]}; {mejlovi["CTSO_disp"]}; {mejlovi["CSODGPON"]}; {mejlovi["CSODADSL"]}"
 message.Subject = f'Lista na precki - TT {date_str}'
 
 df_summery = pd.read_excel(excel_path, sheet_name="Summery", engine='openpyxl')

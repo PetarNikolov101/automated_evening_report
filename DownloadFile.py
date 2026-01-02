@@ -1,9 +1,13 @@
 import win32com.client
 import os
 from datetime import datetime, timedelta
+import json
+
+with open('mejlovi.json', 'r', encoding='utf-8') as f:
+    mejlovi = json.load(f)
 
 SAVE_FOLDER = r"C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
-SENDER_EMAIL = "Branka.Atanasovska@telekom.mk"
+SENDER_EMAIL = mejlovi["Branka"]
 SUBJECT_KEYWORD = "otvoreniprecki"
 DAYS_BACK = 1  # 24h
 
