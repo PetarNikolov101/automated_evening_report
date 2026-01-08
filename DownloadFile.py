@@ -7,45 +7,81 @@ with open('mejlovi.json', 'r', encoding='utf-8') as f:
     mejlovi = json.load(f)
 
 SAVE_FOLDER = r"C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
-SENDER_EMAIL = mejlovi["Branka"]
+SENDER_EMAIL = mejlovi['Branka']
 SUBJECT_KEYWORD = "otvoreniprecki"
-DAYS_BACK = 1  # 24h
+DAYS_BACK = 1  # last 24h
+DEBUG = True
 
-outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-inbox = outlook.GetDefaultFolder(6)  # 6 = Inbox
+outlook = win32com.client.Dispatch("Outlook.Application")
+ns = outlook.GetNamespace("MAPI")
+inbox = ns.GetDefaultFolder(6)  # Inbox
 
-date_limit = (datetime.now() - timedelta(days=DAYS_BACK)).strftime("%m/%d/%Y %H:%M %p")
+date_limit = datetime.now() - timedelta(days=DAYS_BACK)
+target_email = None
 
-messages = inbox.Items
-messages = messages.Restrict(f"[ReceivedTime] >= '{date_limit}'")
-messages.Sort("[ReceivedTime]", True)
+items = inbox.Items
+try:
+    items.Sort("[ReceivedTime]", True)  # newest first
+except Exception:
+    pass
 
-found = False
-for message in messages:
+for msg in items:
     try:
-        if message.Class != 43:  # skip non-mail items
+        if getattr(msg, "Class", None) != 43:  # MailItem
             continue
 
-        sender = message.SenderEmailAddress.strip()
-        subject = message.Subject.strip()
+        subject = getattr(msg, "Subject", "") or ""
+        sender = getattr(msg, "SenderEmailAddress", "") or ""
 
-        if SENDER_EMAIL in sender and SUBJECT_KEYWORD in subject:
-            if message.Attachments.Count > 0:
-                for i in range(1, message.Attachments.Count + 1):
-                    attachment = message.Attachments.Item(i)
-                    filename = attachment.FileName
-                    if filename.lower().endswith(".xlsx"):
-                        save_path = os.path.join(SAVE_FOLDER, filename)
-                        attachment.SaveAsFile(save_path)
-                        print(f"✅ Saved: {save_path}")
-                        found = True
-                        break  # ✅ stop after saving one attachment
-            else:
-                print("⚠️ Found mail but no attachment.")
-            break  # ✅ stop after the first matching email
+        try:
+            received = msg.ReceivedTime
+        except Exception:
+            received = None
+
+        if received is not None:
+            try:
+                if received.replace(tzinfo=None) < date_limit:
+                    break
+            except Exception:
+                pass
+
+        if SENDER_EMAIL.lower() == sender.lower() and \
+           SUBJECT_KEYWORD.lower() in subject.lower():
+            target_email = msg
+            break
+
+    except Exception:
+        continue
+
+if not target_email:
+    raise Exception("No matching email found!")
+
+print("Found email:", getattr(target_email, "Subject", "<no subject>"))
+
+# ---- SAVE EXCEL ATTACHMENT ----
+
+os.makedirs(SAVE_FOLDER, exist_ok=True)
+
+saved = False
+today = datetime.now().strftime("%Y-%m-%d")
+
+for i in range(1, target_email.Attachments.Count + 1):
+    try:
+        attachment = target_email.Attachments.Item(i)
+        filename = attachment.FileName or ""
+
+        if filename.lower().endswith(".xlsx"):
+            dest_name = f"otvoreniprecki.xlsx"
+            dest_path = os.path.join(SAVE_FOLDER, dest_name)
+
+            attachment.SaveAsFile(dest_path)
+            print("✅ Saved:", dest_path)
+            saved = True
+            break
+
     except Exception as e:
-        print(f"❌ Error processing message: {e}")
-        break
+        if DEBUG:
+            print("Attachment error:", e)
 
-if not found:
-    print("No matching emails found.")
+if not saved:
+    raise Exception("Matching email found, but no Excel attachment!")

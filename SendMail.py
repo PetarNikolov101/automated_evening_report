@@ -1,7 +1,7 @@
 import win32com.client
 import pythoncom
 import pandas as pd
-from datetime import date, timedelta, datetime
+from datetime import date, datetime
 import os
 import json
 
@@ -20,6 +20,7 @@ excel_path = os.path.join(r'C:\Users\petarnik\skripta_neotstraneti\skripta_neots
 #message.To = f"{mejlovi['Pero']}"
 message.To = f"{mejlovi['Snezhana']}; {mejlovi['Klimentina']};{mejlovi['Dimitar']}; {mejlovi['Maja']}; {mejlovi['Elizabeta']}; {mejlovi['Regionalni_Ofisi']}; {mejlovi["CTSO"]}; {mejlovi["Anastas"]}; {mejlovi["Kelmend"]}; {mejlovi["Goran"]}; {mejlovi["Irena"]}; {mejlovi["Tatjana"]}; {mejlovi["Zanet"]}; {mejlovi["Emilija"]}; {mejlovi["CTSO_disp"]}; {mejlovi["CSODGPON"]}; {mejlovi["CSODADSL"]}"
 message.Subject = f'Lista na precki - TT {date_str}'
+
 
 df_summery = pd.read_excel(excel_path, sheet_name="Summery", engine='openpyxl')
 edinechni = 0
@@ -50,7 +51,7 @@ try:
             edinechni = int(pd.to_numeric(last.iloc[-1], errors='coerce') or 0)
 except Exception:
     grupni = 0
-
+    
 df_csod = pd.read_excel(excel_path, sheet_name="CSOD", engine = "openpyxl")
 html_table_csod = df_csod.to_html(index = False, border = 1, justify="left", na_rep="")
 csod = 0
