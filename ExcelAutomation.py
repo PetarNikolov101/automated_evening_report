@@ -3,10 +3,12 @@ from datetime import date, timedelta, datetime
 import numpy as np
 import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 #pivot  DataFrame.pivot(index=None, columns=None, values=None)
 
 # read from html
-file_path = "otvoreniprecki"
+file_path = os.path.join(BASE_DIR, 'otvoreniprecki.xlsx')
 
 # dfs = pd.read_html(file_path + ".xls")
 # df = dfs[0]

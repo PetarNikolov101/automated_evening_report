@@ -5,7 +5,9 @@ from datetime import date, datetime
 import os
 import json
 
-with open('mejlovi.json', 'r', encoding='utf-8') as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(BASE_DIR, 'mejlovi.json'), 'r', encoding='utf-8') as f:
     mejlovi = json.load(f)
 
 pythoncom.CoInitialize()
@@ -101,4 +103,4 @@ message.Attachments.Add(excel_path)
 message.Send()
 
 os.remove(excel_path)
-os.remove("otvoreniprecki.xlsx")
+os.remove(os.path.join(BASE_DIR,"otvoreniprecki.xlsx"))

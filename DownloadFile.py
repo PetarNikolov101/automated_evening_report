@@ -3,7 +3,9 @@ import os
 from datetime import datetime, timedelta
 import json
 
-with open('mejlovi.json', 'r', encoding='utf-8') as f:
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+with open(os.path.join(BASE_DIR, 'mejlovi.json'), 'r', encoding='utf-8') as f:
     mejlovi = json.load(f)
 
 SAVE_FOLDER = r"C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
