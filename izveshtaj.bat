@@ -1,4 +1,4 @@
-cd /d D:\skripta_neotstraneti
+cd /d C:\skripta_neotstraneti\skripta_neotstraneti
 
 @echo off
 
@@ -10,3 +10,5 @@ call python C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\ExcelAut
 
 echo Sending Report...
 call python C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\SendMail.py
+
+pause

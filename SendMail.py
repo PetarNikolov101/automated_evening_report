@@ -4,6 +4,9 @@ import pandas as pd
 from datetime import date, datetime
 import os
 import json
+import pythoncom
+
+pythoncom.CoInitialize()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
