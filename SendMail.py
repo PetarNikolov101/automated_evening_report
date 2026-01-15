@@ -1,31 +1,20 @@
-import win32com.client
-import pythoncom
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 import pandas as pd
-from datetime import date, datetime
+from datetime import datetime
 import os
 import json
-import pythoncom
-
-pythoncom.CoInitialize()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 with open(os.path.join(BASE_DIR, 'mejlovi.json'), 'r', encoding='utf-8') as f:
     mejlovi = json.load(f)
 
-pythoncom.CoInitialize()
-
-outlook = win32com.client.Dispatch('Outlook.Application')
-message = outlook.CreateItem(0)
-
-date = datetime.today()
-date_str = date.strftime("%d-%m-%Y")
-name_of_excel = f"Lista na precki - TT {date_str}.xlsx"
-excel_path = os.path.join(r'C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\kreirani datoteki', name_of_excel)
-#message.To = f"{mejlovi['Pero']}"
-message.To = f"{mejlovi['Snezhana']}; {mejlovi['Klimentina']};{mejlovi['Dimitar']}; {mejlovi['Maja']}; {mejlovi['Elizabeta']}; {mejlovi['Regionalni_Ofisi']}; {mejlovi["CTSO"]}; {mejlovi["Anastas"]}; {mejlovi["Kelmend"]}; {mejlovi["Goran"]}; {mejlovi["Irena"]}; {mejlovi["Tatjana"]}; {mejlovi["Zanet"]}; {mejlovi["Emilija"]}; {mejlovi["CTSO_disp"]}; {mejlovi["CSODGPON"]}; {mejlovi["CSODADSL"]}"
-message.Subject = f'Lista na precki - TT {date_str}'
-
+# ---- Build HTML body same as your script ----
+excel_path = os.path.join(BASE_DIR, "kreirani datoteki", "your_file.xlsx")
+df = pd.read_excel(excel_path, sheet_name="Summery", engine='openpyxl')
 
 df_summery = pd.read_excel(excel_path, sheet_name="Summery", engine='openpyxl')
 edinechni = 0
@@ -74,7 +63,6 @@ try:
 except Exception as e:
     print("Error reading CSOD total:", e)
     csod = 0
-
 html_body = f"""
 <html>
   <body>
@@ -99,11 +87,38 @@ html_body = f"""
 </html>
 """
 
-message.HTMLBody = html_body
+with open(os.path.join(BASE_DIR, 'credentials.json'), 'r', encoding='utf-8') as f: 
+    credentials = json.load(f)
 
-message.Attachments.Add(excel_path)
+SMTP_SERVER = credentials["smtp_server"]
+SMTP_PORT = credentials["smtp_port"]
+USERNAME = credentials["username"]
+PASSWORD = credentials["password"]
 
-message.Send()
+msg = MIMEMultipart()
+msg['From'] = USERNAME
+msg['To'] = ", ".join([
+    mejlovi['Snezhana'], mejlovi['Klimentina'], mejlovi['Dimitar'], 
+    mejlovi['Maja'], mejlovi['Elizabeta'], mejlovi['Regionalni_Ofisi'],
+    mejlovi["CTSO"], mejlovi["Anastas"], mejlovi["Kelmend"], mejlovi["Goran"],
+    mejlovi["Irena"], mejlovi["Tatjana"], mejlovi["Zanet"], mejlovi["Emilija"],
+    mejlovi["CTSO_disp"], mejlovi["CSODGPON"], mejlovi["CSODADSL"]
+])
+msg['Subject'] = f'Lista na precki - TT {datetime.today().strftime("%d-%m-%Y")}'
+
+msg.attach(MIMEText(html_body, 'html'))
+
+# attach excel
+with open(excel_path, "rb") as f:
+    part = MIMEApplication(f.read(), Name=os.path.basename(excel_path))
+part['Content-Disposition'] = f'attachment; filename="{os.path.basename(excel_path)}"'
+msg.attach(part)
+
+# send
+with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+    server.starttls()
+    server.login(USERNAME, PASSWORD)
+    server.send_message(msg)
+
 
 os.remove(excel_path)
-os.remove(os.path.join(BASE_DIR,"otvoreniprecki.xlsx"))
