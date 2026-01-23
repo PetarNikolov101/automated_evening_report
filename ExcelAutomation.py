@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import date, timedelta, datetime
 import numpy as np
 import os
+from openpyxl.styles import Font, Alignment
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -63,6 +64,27 @@ selected_columns = selected_df.to_dict('list')
 pomoshen_df = pd.DataFrame(selected_columns)
 # convert Посакуван крај to datetime
 pomoshen_df['Посакуван крај'] = pd.to_datetime(pomoshen_df['Посакуван крај'], errors='coerce', dayfirst=True)
+
+default_font = Font(
+    name="Aptos Narrow",
+    size=10,
+    bold=False
+)
+
+def sort_by_region_and_total(df, region_col='Име на регион', total_col='Вкупно'):
+    return (
+        df
+        .groupby(region_col, group_keys=False)
+        .apply(lambda x: x.sort_values(by=total_col, ascending=False))
+        .reset_index(drop=True)
+    )
+
+def apply_font_to_sheet(sheet, font, alignment=None):
+    for row in sheet.iter_rows():
+        for cell in row:
+            cell.font = font
+            if alignment:
+                cell.alignment = alignment
 
 # add status column
 def categorize_status(deadline):
@@ -131,6 +153,18 @@ overdue_utre['Вкупно'] = (
     + overdue_utre['Тековна']
     + overdue_utre['Веќе пробиена']
 )
+
+def sort_by_region_and_total(df, region_col='Име на регион', total_col='Вкупно'):
+    return (
+        df
+        .groupby(region_col, group_keys=False)
+        .apply(lambda x: x.sort_values(by=total_col, ascending=False))
+        .reset_index(drop=True)
+    )
+
+overdue_utre = sort_by_region_and_total(overdue_utre)
+overdue_summary = sort_by_region_and_total(overdue_summary)
+overdue_grupni = sort_by_region_and_total(overdue_grupni)
 
 # add more columns
 columns_to_add_utre = [
@@ -297,13 +331,13 @@ with pd.ExcelWriter(os.path.join(r"C:\Users\petarnik\skripta_neotstraneti\skript
     # set column widths and height for all sheets
     column_widths = {
         "A": 15, "B": 15, "C": 30, "D": 20, "E": 33, "F": 12, "G": 25,
-        "H": 20, "I": 20, "J": 18, "K": 15, "L": 15, "M": 20, "N": 20
+        "H": 20, "I": 20, "J": 40, "K": 15, "L": 15, "M": 20, "N": 20
     }
     overdue_column_widths = {
         "A": 20, "B": 20, "C": 10   
     }
     overdue_utre_widths = {
-        "A": 20, "B": 20, "C": 20, "D": 20, "E": 20
+        "A": 20, "B": 40, "C": 20, "D": 20, "E": 20
     }
     summery_widths ={
         "A":120, "B":10
@@ -346,6 +380,16 @@ with pd.ExcelWriter(os.path.join(r"C:\Users\petarnik\skripta_neotstraneti\skript
     merge_region_cells(overdue_utre_sheet, region_col_letter='A')
     merge_region_cells(overdue_sheet, region_col_letter='A')
     merge_region_cells(overdue_grupni_sheet, region_col_letter='A')
+
+    # apply font to all sheets
+    apply_font_to_sheet(pomoshen_sheet, default_font, Alignment(wrap_text=True))    
+    apply_font_to_sheet(summery_sheet, default_font, Alignment(wrap_text=True))
+    apply_font_to_sheet(overdue_utre_sheet, default_font, Alignment(wrap_text=True))
+    apply_font_to_sheet(overdue_grupni_sheet, default_font, Alignment(wrap_text=True))
+    apply_font_to_sheet(overdue_sheet, default_font, Alignment(wrap_text=True))
+    apply_font_to_sheet(data_sheet, default_font, Alignment(wrap_text=True))
+    apply_font_to_sheet(hidden_csod, default_font, Alignment(wrap_text=True))
+    # hide sheets
 
     pomoshen_sheet.sheet_state = 'hidden'
     csod_summary.sheet_state = 'hidden'
