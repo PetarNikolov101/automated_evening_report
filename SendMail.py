@@ -74,10 +74,43 @@ try:
 except Exception as e:
     print("Error reading CSOD total:", e)
     csod = 0
+html_table_edinechni = html_table_edinechni.replace(
+    '<table ',
+    '<table style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; border-collapse:collapse;" '
+).replace(
+    '<th>',
+    '<th style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+).replace(
+    '<td>',
+    '<td style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+)
 
+html_table_grupni = html_table_grupni.replace(
+    '<table ',
+    '<table style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; border-collapse:collapse;" '
+).replace(
+    '<th>',
+    '<th style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+).replace(
+    '<td>',
+    '<td style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+)
+
+html_table_csod = html_table_csod.replace(
+    '<table ',
+    '<table style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; border-collapse:collapse;" '
+).replace(
+    '<th>',
+    '<th style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+).replace(
+    '<td>',
+    '<td style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
+)
 html_body = f"""
 <html>
-  <body>
+  <body style="
+    font-family: 'Aptos Narrow', Aptos, Calibri, Arial, sans-serif;
+    font-size: 10pt;">
     <p>Колеги,</p>
     <p> Во моментот во SSOD имаме {edinechni} незатворени единечни пречки.</p>
 
