@@ -124,34 +124,35 @@ html_body = f"""
 """
 
 
+# recipients = [
+#     mejlovi['Snezhana'],
+#     mejlovi['Klimentina'],
+#     mejlovi['Dimitar'],
+#     mejlovi['Maja'],
+#     mejlovi['Elizabeta'],
+#     mejlovi['Regionalni_Ofisi'],
+#     mejlovi['CTSO'],
+#     mejlovi['Anastas'],
+#     mejlovi['Kelmend'],
+#     mejlovi['Goran'],
+#     mejlovi['Irena'],
+#     mejlovi['Tatjana'],
+#     mejlovi['Zanet'],
+#     mejlovi['Emilija'],
+#     mejlovi['CTSO_disp'],
+#     mejlovi['CSODGPON'],
+#     mejlovi['CSODADSL'],
+# ]
+
 recipients = [
-    mejlovi['Snezhana'],
-    mejlovi['Klimentina'],
-    mejlovi['Dimitar'],
-    mejlovi['Maja'],
-    mejlovi['Elizabeta'],
-    mejlovi['Regionalni_Ofisi'],
-    mejlovi['CTSO'],
-    mejlovi['Anastas'],
-    mejlovi['Kelmend'],
-    mejlovi['Goran'],
-    mejlovi['Irena'],
-    mejlovi['Tatjana'],
-    mejlovi['Zanet'],
-    mejlovi['Emilija'],
-    mejlovi['CTSO_disp'],
-    mejlovi['CSODGPON'],
-    mejlovi['CSODADSL'],
+    mejlovi['Pero']
 ]
 
 msg = EmailMessage()
-msg['From'] = "your_email@company.com"
 msg['To'] = ", ".join(recipients)
 msg['Subject'] = f"Lista na precki - TT {date_str}"
 msg['Date'] = formatdate(localtime=True)
 
-msg.set_content("Вашиот клиент не поддржува HTML е-пошта.")
-msg.add_alternative(html_body, subtype='html')
 
 # attach excel file
 
@@ -165,10 +166,8 @@ with open(excel_path, 'rb') as f:
 
 # send
 
-
-
-SMTP_SERVER = "smtp.server.com"
-SMTP_PORT = 25
+SMTP_SERVER = credentials["SMTP_server"]
+SMTP_PORT = credentials["SMTP_port"]
 
 with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
     server.send_message(msg)
