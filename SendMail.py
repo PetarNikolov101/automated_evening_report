@@ -153,6 +153,8 @@ msg['To'] = ", ".join(recipients)
 msg['Subject'] = f"Lista na precki - TT {date_str}"
 msg['Date'] = formatdate(localtime=True)
 
+msg.set_content("Вашиот клиент не поддржува HTML.")
+msg.add_alternative(html_body, subtype='html')
 
 # attach excel file
 
