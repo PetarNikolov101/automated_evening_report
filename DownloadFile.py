@@ -9,7 +9,7 @@ with open(os.path.join(BASE_DIR, 'mejlovi.json'), 'r', encoding='utf-8') as f:
     mejlovi = json.load(f)
 
 SAVE_FOLDER = r"C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
-SENDER_EMAIL = mejlovi['Branka']
+SENDER_EMAIL = mejlovi['svc']
 SUBJECT_KEYWORD = "otvoreniprecki"
 DAYS_BACK = 1  # last 24h
 DEBUG = True
