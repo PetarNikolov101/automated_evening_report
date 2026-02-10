@@ -152,6 +152,7 @@ msg = EmailMessage()
 msg['To'] = ", ".join(recipients)
 msg['Subject'] = f"Lista na precki - TT {date_str}"
 msg['Date'] = formatdate(localtime=True)
+msg['From'] = mejlovi['Pero']
 
 msg.set_content("Вашиот клиент не поддржува HTML.")
 msg.add_alternative(html_body, subtype='html')
@@ -171,7 +172,7 @@ with open(excel_path, 'rb') as f:
 SMTP_SERVER = credentials["SMTP_server"]
 SMTP_PORT = credentials["SMTP_port"]
 
-with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=30) as server:
     server.send_message(msg)
 
 #cleanup
