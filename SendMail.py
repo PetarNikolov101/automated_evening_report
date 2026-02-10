@@ -5,6 +5,34 @@ from datetime import date, datetime
 import os
 import json
 import pythoncom
+import re
+
+def widen_column_by_header(html, header_name, width_px=220):
+    # find the index of the header
+    headers = re.findall(r'<th.*?>(.*?)</th>', html, flags=re.DOTALL)
+    headers = [re.sub('<.*?>', '', h).strip() for h in headers]
+
+    if header_name not in headers:
+        return html
+
+    col_index = headers.index(header_name) + 1  # nth-child is 1-based
+
+    # style <th>
+    html = re.sub(
+        fr'(<th[^>]*>:?{header_name}</th>)',
+        fr'<th style="width:{width_px}px; min-width:{width_px}px;">{header_name}</th>',
+        html
+    )
+
+    # style <td> in that column
+    html = re.sub(
+        fr'(<tr[^>]*>(?:.*?</td>){{{col_index-1}}})(<td)',
+        fr'\1<td style="width:{width_px}px; min-width:{width_px}px; white-space:nowrap;">',
+        html,
+        flags=re.DOTALL
+    )
+
+    return html
 
 pythoncom.CoInitialize()
 
@@ -60,6 +88,18 @@ except Exception:
 df_csod = pd.read_excel(excel_path, sheet_name="CSOD", engine = "openpyxl")
 html_table_csod = df_csod.to_html(index = False, border = 1, justify="left", na_rep="")
 csod = 0
+
+html_table_edinechni = widen_column_by_header(
+    html_table_edinechni, "Техничар", width_px=240
+)
+
+html_table_grupni = widen_column_by_header(
+    html_table_grupni, "Техничар", width_px=240
+)
+
+html_table_csod = widen_column_by_header(
+    html_table_csod, "Техничар", width_px=240
+)
 
 try:
     first_col = df_csod.columns[0]  # should be "Класификација"

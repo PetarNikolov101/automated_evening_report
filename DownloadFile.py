@@ -60,7 +60,6 @@ if not target_email:
 
 print("Found email:", getattr(target_email, "Subject", "<no subject>"))
 
-# ---- SAVE EXCEL ATTACHMENT ----
 
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
