@@ -222,6 +222,7 @@ recipients = [
     mejlovi['CTSO_disp'],
     mejlovi['CSODGPON'],
     mejlovi['CSODADSL'],
+    mejlovi['Pero']
 ]
 
 # recipients = [
