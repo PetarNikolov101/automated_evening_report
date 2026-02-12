@@ -2,9 +2,10 @@ import pandas as pd
 from datetime import datetime
 import os
 import json
-<<<<<<< HEAD
-import pythoncom
 import re
+import smtplib
+from email.message import EmailMessage
+from email.utils import formatdate
 
 def widen_column_by_header(html, header_name, width_px=220):
     # find the index of the header
@@ -32,11 +33,6 @@ def widen_column_by_header(html, header_name, width_px=220):
     )
 
     return html
-=======
-import smtplib
-from email.message import EmailMessage
-from email.utils import formatdate
->>>>>>> SMTP_version
 
 # setup
 
@@ -88,7 +84,6 @@ df_csod = pd.read_excel(excel_path, sheet_name="CSOD", engine='openpyxl')
 html_table_csod = df_csod.to_html(index=False, border=1, justify='left', na_rep='')
 
 csod = 0
-<<<<<<< HEAD
 
 html_table_edinechni = widen_column_by_header(
     html_table_edinechni, "Техничар", width_px=240
@@ -102,8 +97,7 @@ html_table_csod = widen_column_by_header(
     html_table_csod, "Техничар", width_px=240
 )
 
-=======
->>>>>>> SMTP_version
+
 try:
     first_col = df_csod.columns[0]
     mask = df_csod[first_col].astype(str).str.strip().str.upper() == 'ВКУПНО'
@@ -123,7 +117,7 @@ html_table_edinechni = html_table_edinechni.replace(
     '<td style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; padding:4px;">'
 )
 
-<<<<<<< HEAD
+
 html_table_grupni = html_table_grupni.replace(
     '<table ',
     '<table style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; border-collapse:collapse;" '
@@ -149,8 +143,7 @@ html_body = f"""
 <html>
   <body style="
     font-family: 'Aptos Narrow', Aptos, Calibri, Arial, sans-serif;
-    font-size: 10pt;">
-=======
+    font-size: 10pt;">"""
 # styloing
 
 def style_table(html):
@@ -173,7 +166,6 @@ html_table_csod = style_table(html_table_csod)
 html_body = f"""
 <html>
   <body style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt;">
->>>>>>> SMTP_version
     <p>Колеги,</p>
 
     <p>Во моментот во SSOD имаме <b>{edinechni}</b> незатворени единечни пречки.</p>
@@ -212,29 +204,29 @@ html_body = f"""
 """
 
 
-# recipients = [
-#     mejlovi['Snezhana'],
-#     mejlovi['Klimentina'],
-#     mejlovi['Dimitar'],
-#     mejlovi['Maja'],
-#     mejlovi['Elizabeta'],
-#     mejlovi['Regionalni_Ofisi'],
-#     mejlovi['CTSO'],
-#     mejlovi['Anastas'],
-#     mejlovi['Kelmend'],
-#     mejlovi['Goran'],
-#     mejlovi['Irena'],
-#     mejlovi['Tatjana'],
-#     mejlovi['Zanet'],
-#     mejlovi['Emilija'],
-#     mejlovi['CTSO_disp'],
-#     mejlovi['CSODGPON'],
-#     mejlovi['CSODADSL'],
-# ]
-
 recipients = [
-    mejlovi['Pero']
+    mejlovi['Snezhana'],
+    mejlovi['Klimentina'],
+    mejlovi['Dimitar'],
+    mejlovi['Maja'],
+    mejlovi['Elizabeta'],
+    mejlovi['Regionalni_Ofisi'],
+    mejlovi['CTSO'],
+    mejlovi['Anastas'],
+    mejlovi['Kelmend'],
+    mejlovi['Goran'],
+    mejlovi['Irena'],
+    mejlovi['Tatjana'],
+    mejlovi['Zanet'],
+    mejlovi['Emilija'],
+    mejlovi['CTSO_disp'],
+    mejlovi['CSODGPON'],
+    mejlovi['CSODADSL'],
 ]
+
+# recipients = [
+#     mejlovi['Pero']
+# ]
 
 msg = EmailMessage()
 msg['To'] = ", ".join(recipients)
