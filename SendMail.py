@@ -114,6 +114,7 @@ try:
 except Exception as e:
     print("Error reading CSOD total:", e)
     csod = 0
+    
 html_table_edinechni = html_table_edinechni.replace(
     '<table ',
     '<table style="font-family: Aptos Narrow, Aptos, Calibri, Arial, sans-serif; font-size:10pt; border-collapse:collapse;" '
