@@ -1,5 +1,3 @@
-cd /d C:\skripta_neotstraneti\skripta_neotstraneti
-
 @echo off
 
 echo Downloading File...

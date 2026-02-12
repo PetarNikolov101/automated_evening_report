@@ -225,10 +225,6 @@ recipients = [
     mejlovi['Pero']
 ]
 
-# recipients = [
-#     mejlovi['Pero']
-# ]
-
 msg = EmailMessage()
 msg['To'] = ", ".join(recipients)
 msg['Subject'] = f"Lista na precki - TT {date_str}"
