@@ -249,6 +249,11 @@ with open(excel_path, 'rb') as f:
 SMTP_SERVER = credentials["SMTP_server"]
 SMTP_PORT = credentials["SMTP_port"]
 
+# with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=30) as server:
+#     server.starttls()
+#     server.login(credentials["username"], credentials["password"])
+#     server.send_message(msg)
+
 with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=30) as server:
     server.send_message(msg)
 

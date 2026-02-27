@@ -1,12 +1,13 @@
 @echo off
+cd /d "C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
 
 echo Downloading File...
-call python C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\DownloadFile.py
+call "C:\Python314\python.exe" DownloadFile.py >> log.txt 2>&1
 
 echo Creating Report...
-call python C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\ExcelAutomation.py 
+call "C:\Python314\python.exe" ExcelAutomation.py >> log.txt 2>&1
 
 echo Sending Report...
-call python C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti\SendMail.py
+call "C:\Python314\python.exe" SendMail.py >> log.txt 2>&1
 
-pause
+echo Done.

@@ -2,25 +2,36 @@ import os
 import json
 import requests
 import msal
-from datetime import datetime, timedelta
 import base64
+from datetime import datetime, timedelta, timezone
+from urllib.parse import quote
 
-# setup
+
+# ========================
+# CONFIGURATION
+# ========================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with open(os.path.join(BASE_DIR, 'mejlovi.json'), 'r', encoding='utf-8') as f:
+with open(os.path.join(BASE_DIR, "mejlovi.json"), "r", encoding="utf-8") as f:
     mejlovi = json.load(f)
 
-with open(os.path.join(BASE_DIR, 'credentials.json'), 'r', encoding='utf-8') as f:
+with open(os.path.join(BASE_DIR, "credentials.json"), "r", encoding="utf-8") as f:
     creds = json.load(f)
 
 SAVE_FOLDER = r"C:\Users\petarnik\skripta_neotstraneti\skripta_neotstraneti"
-SENDER_EMAIL = mejlovi['Pero']
+MAILBOX = creds["shared_mailbox"]
+
+EXPECTED_SENDER = mejlovi["svc"].lower()
 SUBJECT_KEYWORD = "otvoreniprecki"
 DAYS_BACK = 1
+
 DEBUG = True
 
+
+# ========================
+# AUTHENTICATION
+# ========================
 
 def get_access_token():
     app = msal.ConfidentialClientApplication(
@@ -34,88 +45,152 @@ def get_access_token():
     )
 
     if "access_token" not in result:
-        raise Exception(f"Could not get token: {result}")
+        raise Exception(f"Could not acquire token: {result}")
 
     return result["access_token"]
 
 
+# ========================
+# GRAPH HELPER
+# ========================
+
+def graph_get(url, headers):
+    response = requests.get(url, headers=headers)
+
+    if DEBUG:
+        print("\nREQUEST:", url)
+        print("STATUS:", response.status_code)
+
+    if response.status_code >= 400:
+        raise Exception(f"Graph API error: {response.text}")
+
+    return response.json()
+
+
+# ========================
+# FIND MATCHING MESSAGE
+# ========================
+
+def find_matching_message(headers):
+
+    date_limit = (
+        datetime.now(timezone.utc) - timedelta(days=DAYS_BACK)
+    ).isoformat().replace("+00:00", "Z")
+
+    # Only use SAFE Graph filters
+    filter_query = (
+        f"receivedDateTime ge {date_limit} "
+        f"and hasAttachments eq true"
+    )
+
+    encoded_filter = quote(filter_query)
+
+    url = (
+        f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/messages"
+        f"?$filter={encoded_filter}"
+        "&$orderby=receivedDateTime desc"
+        "&$top=10"
+    )
+
+    data = graph_get(url, headers)
+    messages = data.get("value", [])
+
+    if not messages:
+        raise Exception("No recent messages found.")
+
+    for message in messages:
+
+        subject = (message.get("subject") or "").lower()
+        sender = (
+            message.get("from", {})
+            .get("emailAddress", {})
+            .get("address", "")
+            .lower()
+        )
+
+        if DEBUG:
+            print("\nChecking message:")
+            print("Subject:", subject)
+            print("Sender:", sender)
+
+        if SUBJECT_KEYWORD.lower() in subject and sender == EXPECTED_SENDER:
+            print("\n Matching email found.")
+            return message
+
+    raise Exception("No matching email found after filtering.")
+
+
+# ========================
+# DOWNLOAD ATTACHMENT
+# ========================
+
+def download_excel_attachment(message_id, headers):
+
+    url = f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/messages/{message_id}/attachments"
+    data = graph_get(url, headers)
+
+    attachments = data.get("value", [])
+
+    if not attachments:
+        raise Exception("Email found but has no attachments.")
+
+    os.makedirs(SAVE_FOLDER, exist_ok=True)
+
+    for attachment in attachments:
+
+        if attachment.get("@odata.type") != "#microsoft.graph.fileAttachment":
+            continue
+
+        filename = attachment.get("name", "")
+
+        if not filename.lower().endswith((".xlsx", ".xls")):
+            continue
+
+        print(f"\nFound Excel attachment: {filename}")
+
+        # Large attachment support
+        content_bytes = attachment.get("contentBytes")
+
+        if content_bytes:
+            file_bytes = base64.b64decode(content_bytes)
+        else:
+            # Fallback for large files
+            download_url = attachment.get("@microsoft.graph.downloadUrl")
+            file_response = requests.get(download_url)
+            file_bytes = file_response.content
+
+        save_path = os.path.join(SAVE_FOLDER, "otvoreniprecki.xlsx")
+
+        with open(save_path, "wb") as f:
+            f.write(file_bytes)
+
+        print(f"File saved to: {save_path}")
+        return
+
+    raise Exception("No Excel attachment found.")
+
+
+# ========================
+# MAIN
+# ========================
+
 def main():
+
+    print("Authenticating...")
     token = get_access_token()
 
     headers = {
         "Authorization": f"Bearer {token}"
     }
 
-    date_limit = (datetime.now() - timedelta(days=DAYS_BACK)).isoformat() + "Z"
+    print("Searching for email...")
+    message = find_matching_message(headers)
 
-    # filter emails
-    filter_query = (
-        f"receivedDateTime ge {date_limit} "
-        f"and from/emailAddress/address eq '{SENDER_EMAIL}' "
-        f"and contains(subject,'{SUBJECT_KEYWORD}')"
-    )
+    print("Downloading attachment...")
+    download_excel_attachment(message["id"], headers)
 
-    url = (
-        "https://graph.microsoft.com/v1.0/users/"
-        f"{creds['shared_mailbox']}/mailFolders/inbox/messages"
-        f"?$filter={filter_query}"
-        "&$orderby=receivedDateTime desc"
-        "&$top=1"
-    )
-
-    response = requests.get(url, headers=headers)
-    data = response.json()
-
-    if DEBUG:
-        print("Graph response:", data)
-
-    messages = data.get("value", [])
-
-    if not messages:
-        raise Exception("No matching email found!")
-
-    message = messages[0]
-    message_id = message["id"]
-
-    print("Found email:", message.get("subject"))
-
-    # get attachment
-    att_url = f"https://graph.microsoft.com/v1.0/users/{creds['shared_mailbox']}/messages/{message_id}/attachments"
-    att_response = requests.get(att_url, headers=headers)
-    att_data = att_response.json()
-    print("Attachment response:", att_data)
-
-    attachments = att_data.get("value", [])
-
-    if not attachments:
-        raise Exception("Matching email found, but no attachments!")
-
-    os.makedirs(SAVE_FOLDER, exist_ok=True)
-
-    saved = False
-
-    for attachment in attachments:
-        name = attachment.get("name", "")
-        if name.lower().endswith(".xlsx"):
-
-            content_bytes = attachment.get("contentBytes")
-
-            if content_bytes:
-                file_bytes = base64.b64decode(content_bytes)
-
-                dest_path = os.path.join(SAVE_FOLDER, "otvoreniprecki.xlsx")
-
-                with open(dest_path, "wb") as f:
-                    f.write(file_bytes)
-
-                print("✅ Saved:", dest_path)
-                saved = True
-                break
-
-    if not saved:
-        raise Exception("Matching email found, but no Excel attachment!")
+    print("\nDone successfully.")
 
 
 if __name__ == "__main__":
     main()
-    

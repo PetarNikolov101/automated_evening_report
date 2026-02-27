@@ -11,3 +11,6 @@ credentials.json
 da se oprai.txt
 credentials.json
 smtp_imap_test.py
+log.txt
+oldlogs.txt
+gtest.py
