@@ -14,3 +14,4 @@ smtp_imap_test.py
 log.txt
 oldlogs.txt
 gtest.py
+__pycache__
