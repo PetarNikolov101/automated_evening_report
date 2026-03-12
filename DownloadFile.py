@@ -86,7 +86,7 @@ def find_matching_message(headers):
     encoded_filter = quote(filter_query)
 
     url = (
-        f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/messages"
+        f"https://graph.microsoft.com/v1.0/users/{MAILBOX}/mailFolders/inbox/messages"
         f"?$filter={encoded_filter}"
         "&$orderby=receivedDateTime desc"
         "&$top=10"
