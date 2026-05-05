@@ -139,6 +139,7 @@ html_body = f"""
 
 
 recipients = [
+    mejlovi['Pero'],
     mejlovi['Snezhana'],
     mejlovi['Klimentina'],
     mejlovi['Dimitar'],
@@ -155,8 +156,7 @@ recipients = [
     mejlovi['Emilija'],
     mejlovi['CTSO_disp'],
     mejlovi['CSODGPON'],
-    mejlovi['CSODADSL'],
-    mejlovi['Pero']
+    mejlovi['CSODADSL']
 ]
 
 

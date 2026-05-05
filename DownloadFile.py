@@ -7,9 +7,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 
 
-# ========================
-# CONFIGURATION
-# ========================
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,9 +27,7 @@ DAYS_BACK = 1
 DEBUG = True
 
 
-# ========================
-# AUTHENTICATION
-# ========================
+# auth
 
 def get_access_token():
     app = msal.ConfidentialClientApplication(
@@ -50,9 +46,7 @@ def get_access_token():
     return result["access_token"]
 
 
-# ========================
-# GRAPH HELPER
-# ========================
+# graph
 
 def graph_get(url, headers):
     response = requests.get(url, headers=headers)
@@ -67,9 +61,7 @@ def graph_get(url, headers):
     return response.json()
 
 
-# ========================
-# FIND MATCHING MESSAGE
-# ========================
+# find the mail
 
 def find_matching_message(headers):
 
@@ -120,9 +112,6 @@ def find_matching_message(headers):
     raise Exception("No matching email found after filtering.")
 
 
-# ========================
-# DOWNLOAD ATTACHMENT
-# ========================
 
 def download_excel_attachment(message_id, headers):
 
@@ -169,10 +158,6 @@ def download_excel_attachment(message_id, headers):
 
     raise Exception("No Excel attachment found.")
 
-
-# ========================
-# MAIN
-# ========================
 
 def main():
 
